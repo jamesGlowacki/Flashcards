@@ -76,7 +76,12 @@ def get_cards(url):
 	return(deck)
 
 def splitJoin(text):
-	return(" ".join(text.split()[:len(text.split())//2]),
+
+	if(len(text)//2>60):
+		return(splitJoin(" ".join(text.split()[:len(text.split())//2])) +
+				splitJoin(" ".join(text.split()[len(text.split())//2:])))
+	else:
+		return(" ".join(text.split()[:len(text.split())//2]),
 			" ".join(text.split()[len(text.split())//2:]))
 
 
@@ -91,23 +96,25 @@ for url in urls:
 	for c in d:
 		#print(c)
 		prime.add_card(c)
-#prime.play()
-#prime.print_deck();
+
 print(len(prime.cards))
 play_deck = prime.get_list() #returns the cards in list form
-#print(play_deck)
+
 
 
 pygame.init()
-screen = pygame.display.set_mode((900, 480))
+WIDTH, HEIGHT = 900,480
+r,g,b = 0,0,0
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
 clock = pygame.time.Clock()
 done = False
 
 font = pygame.font.SysFont("comicsansms", 28)
 
+t = play_deck[0].term
 xl = False
 count = 0
-text = font.render(play_deck[0].term, True, (0, 128, 0))
+text = font.render(play_deck[0].term, True, (r,g,b))
 #btext = font.render(play_deck[0], True, (0, 128, 0))
 default = (255, 255, 255)
 
@@ -123,14 +130,14 @@ while not done:
             #default = (0,0,0)
             count +=1
             text = play_deck[count].term
+
             if(len(text)>60):
             	xl = True
             	t = splitJoin(text)
-            	text = font.render(t[0], True, (0, 128, 0))
-            	btext = font.render(t[1], True, (0, 128, 0))
             else:
             	xl = False
-            	text = font.render(play_deck[count].term, True, (0, 128, 0))
+            	t = text
+            	text = font.render(play_deck[count].term, True, (r, g, b))
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_UP:
         	count -= 1
@@ -138,10 +145,9 @@ while not done:
         	if len(text)>60:
         		xl = True
         		t = splitJoin(text)
-        		text = font.render(t[0], True, (0, 128, 0))
-        		btext = font.render(t[1], True, (0, 128, 0))
         	else:
         		xl = False
+        		t = text
         		text = font.render(text, True, (0,128,0))
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_RIGHT:
@@ -156,6 +162,7 @@ while not done:
         		btext = font.render(t[1], True, (0,128,0))
         	else:
         		xl = False
+        		t= text
         		text = font.render(text, True, (0,128,0))
 
         if event.type == pygame.KEYDOWN and event.key == pygame.K_LEFT:
@@ -164,19 +171,22 @@ while not done:
         	if(len(text)>60):
         		xl = True
         		t = splitJoin(text)
-        		text = font.render(t[0], True, (0,128,0))
-        		btext = font.render(t[1], True, (0,128,0))
         	else:
         		xl = False
+        		t = text
         		text = font.render(play_deck[count].term, True, (0,128,0))
     
     screen.fill(default)
     if(xl):
-    	screen.blit(text,(450 - text.get_width() // 2, 215 - text.get_height() // 2))
-    	screen.blit(btext,(450 - btext.get_width() // 2, 245 - btext.get_height() // 2))
+    	for i in range(len(t)):
+    		text = font.render(t[i],True, (r,g,b))
+    		screen.blit(text,(450 - text.get_width() // 2, 
+    				(240-(len(t)-1)*30) + (i*30) - text.get_height() // 2))
+    	
     else:
-	    screen.blit(text,
-	        (450 - text.get_width() // 2, 240 - text.get_height() // 2))
+
+    	text = font.render(t,True,(r,g,b))
+    	screen.blit(text,(450 - text.get_width() // 2, 240 - text.get_height() // 2))
 	    #screen.blit(btext,
 	    #    (450 - btext.get_width() // 2, 240 - btext.get_height() // 2))
     pygame.display.flip()
